@@ -175,8 +175,8 @@
      2. Copie a "Project URL" e a "anon public" key
      ================================================================ */
   
-  const SUPABASE_URL = 'https://sistema-art.vercel.app/upload.html';   // ← substitua
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvaXB6Ynd1bmFzZXp0Y2dqend3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTAyNTAsImV4cCI6MjA4ODI4NjI1MH0.ZCj4BwkpMpPKWvskAa3MoYgVhe0HeKRUphxnLbAM-h0'; 
+  const SUPABASE_URL = 'https://goipzbwunaseztcgjzww.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvaXB6Ynd1bmFzZXp0Y2dqend3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTAyNTAsImV4cCI6MjA4ODI4NjI1MH0.ZCj4BwkpMpPKWvskAa3MoYgVhe0HeKRUphxnLbAM-h0';
 
   /* ----------------------------------------------------------------
      SEGURANÇA — Row Level Security (RLS):
@@ -190,7 +190,7 @@
      para usuários autenticados (ver comentário em upload.html).
      ---------------------------------------------------------------- */
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   /* ── DOM refs ── */
   const loader           = document.getElementById('loader');
@@ -214,7 +214,7 @@
      ════════════════════════════════════════ */
   async function carregarArtes() {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('artes')
         .select('*')
         .order('created_at', { ascending: false });
@@ -349,8 +349,7 @@
      4. REAL-TIME — Supabase Subscription
      ════════════════════════════════════════ */
   function subscribeToArtes() {
-    supabase
-      .channel('artes-channel')
+    db
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'artes' },

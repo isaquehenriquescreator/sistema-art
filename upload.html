@@ -94,8 +94,8 @@
      1. Acesse https://supabase.com → Seu projeto → Settings → API
      2. Copie a "Project URL" e a "anon public" key
      ================================================================ */
-  const SUPABASE_URL = 'https://sistema-art.vercel.app/upload.html';   // ← substitua
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvaXB6Ynd1bmFzZXp0Y2dqend3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTAyNTAsImV4cCI6MjA4ODI4NjI1MH0.ZCj4BwkpMpPKWvskAa3MoYgVhe0HeKRUphxnLbAM-h0';                 // ← substitua
+  const SUPABASE_URL = 'https://goipzbwunaseztcgjzww.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvaXB6Ynd1bmFzZXp0Y2dqend3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTAyNTAsImV4cCI6MjA4ODI4NjI1MH0.ZCj4BwkpMpPKWvskAa3MoYgVhe0HeKRUphxnLbAM-h0';
 
   /* ----------------------------------------------------------------
      SEGURANÇA — Row Level Security (RLS) no Supabase:
@@ -111,14 +111,14 @@
      ---------------------------------------------------------------- */
 
   /* LOGIN OPCIONAL — descomente se RLS exigir autenticação:
-  const { error: authError } = await supabase.auth.signInWithPassword({
+  const { error: authError } = await db.auth.signInWithPassword({
     email: 'admin@example.com',
     password: 'senha-segura',
   });
   if (authError) console.error('Auth error:', authError.message);
   */
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   /* ── DOM refs ── */
   const fileInput    = document.getElementById('fileInput');
@@ -192,7 +192,7 @@
       showProgress(30);
 
       /* 2. Upload para o Supabase Storage (bucket: 'artes') */
-      const { data: storageData, error: storageError } = await supabase
+      const { data: storageData, error: storageError } = await db
         .storage
         .from('artes')
         .upload(filePath, selectedFile, {
@@ -206,7 +206,7 @@
       showProgress(65);
 
       /* 3. Obtém a URL pública da imagem */
-      const { data: { publicUrl } } = supabase
+      const { data: { publicUrl } } = db
         .storage
         .from('artes')
         .getPublicUrl(filePath);
@@ -215,7 +215,7 @@
 
       /* 4. Insere metadados na tabela 'artes' */
       const nome = arteName.value.trim() || 'Sem título';
-      const { error: dbError } = await supabase
+      const { error: dbError } = await db
         .from('artes')
         .insert({
           nome:       nome,
