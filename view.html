@@ -32,27 +32,8 @@
     .swiper-slide { opacity: 0.35; transition: opacity 0.5s ease; }
     .swiper-slide-active { opacity: 1; }
 
-    /* Scale inactive slides + float animation on active */
     .art-slide { transform: scale(0.88); transition: transform 0.5s ease; }
-    .swiper-slide-active .art-slide {
-      transform: scale(1);
-      animation: floatSlide 4s ease-in-out infinite;
-    }
-
-    @keyframes floatSlide {
-      0%, 100% { transform: scale(1) translateY(0px);   }
-      50%       { transform: scale(1) translateY(-14px); }
-    }
-
-    /* Imagem em proporção original, sem corte */
-    .art-img {
-      max-height: 80vh !important;
-      width: auto !important;
-      max-width: 100% !important;
-      object-fit: unset !important;
-      display: block;
-      margin: 0 auto;
-    }
+    .swiper-slide-active .art-slide { transform: scale(1); }
 
     /* Thumbnail strip */
     .thumb-swiper {
@@ -193,8 +174,8 @@
      2. Copie a "Project URL" e a "anon public" key
      ================================================================ */
   
-  const SUPABASE_URL = 'https://goipzbwunaseztcgjzww.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvaXB6Ynd1bmFzZXp0Y2dqend3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTAyNTAsImV4cCI6MjA4ODI4NjI1MH0.ZCj4BwkpMpPKWvskAa3MoYgVhe0HeKRUphxnLbAM-h0';
+  const SUPABASE_URL = 'https://sistema-art.vercel.app/upload.html';   // ← substitua
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvaXB6Ynd1bmFzZXp0Y2dqend3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTAyNTAsImV4cCI6MjA4ODI4NjI1MH0.ZCj4BwkpMpPKWvskAa3MoYgVhe0HeKRUphxnLbAM-h0'; 
 
   /* ----------------------------------------------------------------
      SEGURANÇA — Row Level Security (RLS):
@@ -208,7 +189,7 @@
      para usuários autenticados (ver comentário em upload.html).
      ---------------------------------------------------------------- */
 
-  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   /* ── DOM refs ── */
   const loader           = document.getElementById('loader');
@@ -232,7 +213,7 @@
      ════════════════════════════════════════ */
   async function carregarArtes() {
     try {
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from('artes')
         .select('*')
         .order('created_at', { ascending: false });
@@ -367,7 +348,7 @@
      4. REAL-TIME — Supabase Subscription
      ════════════════════════════════════════ */
   function subscribeToArtes() {
-    db
+    supabase
       .channel('artes-channel')
       .on(
         'postgres_changes',

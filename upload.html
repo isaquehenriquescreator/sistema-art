@@ -5,6 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Upload — Arte Gallery</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .storage-usage {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+      opacity: 0.55;
+      transition: opacity 0.3s ease;
+    }
+    .storage-usage:hover { opacity: 1; }
+    .storage-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .storage-bar-wrap {
+      flex: 1;
+      height: 2px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .storage-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+      border-radius: 2px;
+      transition: width 1s ease;
+    }
+    .storage-text {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  </style>
 </head>
 <body>
 
@@ -75,6 +115,15 @@
 
       <!-- Feedback -->
       <div class="feedback" id="feedback"></div>
+
+      <!-- Storage usage -->
+      <div class="storage-usage" id="storageUsage">
+        <span class="storage-label">Armazenamento</span>
+        <div class="storage-bar-wrap">
+          <div class="storage-bar-fill" id="storageFill"></div>
+        </div>
+        <span class="storage-text" id="storageText">—</span>
+      </div>
 
     </div>
   </div>
@@ -271,6 +320,22 @@
     feedback.className = 'feedback';
     feedback.innerHTML = '';
   }
+
+  /* ── Storage usage ── */
+  async function loadStorageUsage() {
+    try {
+      const { data, error } = await db.storage.from('artes').list('', { limit: 1000 });
+      if (error || !data) return;
+      const totalBytes = data.reduce((acc, f) => acc + (f.metadata?.size || 0), 0);
+      const limitBytes = 50 * 1024 * 1024; // 50 MB (plano free)
+      const pct = Math.min((totalBytes / limitBytes) * 100, 100);
+      const usedMB = (totalBytes / (1024 * 1024)).toFixed(1);
+      document.getElementById('storageFill').style.width = pct + '%';
+      document.getElementById('storageText').textContent = `${usedMB} MB / 50 MB`;
+    } catch (_) { /* silently ignore */ }
+  }
+
+  loadStorageUsage();
 </script>
 
 </body>
