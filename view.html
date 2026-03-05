@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galeria — Arte Gallery</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+  <style>
+    /* ── Extra styles for view page ── */
+    .gallery-wrap {
+      position: relative;
+    }
+
+    /* Ambient light effect behind current slide */
+    .ambient {
+      position: fixed;
+      top: 50%; left: 50%;
+      width: 600px; height: 600px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      transition: all 1s ease;
+    }
+
+    .swiper-wrapper { align-items: center; }
+
+    /* Inactive slide dim effect */
+    .swiper-slide { opacity: 0.35; transition: opacity 0.5s ease; }
+    .swiper-slide-active { opacity: 1; }
+
+    /* Scale inactive slides slightly */
+    .art-slide { transform: scale(0.88); transition: transform 0.5s ease; }
+    .swiper-slide-active .art-slide { transform: scale(1); }
+
+    /* Thumbnail strip */
+    .thumb-swiper {
+      padding: 16px 60px 0 !important;
+    }
+
+    .thumb-swiper .swiper-slide {
+      opacity: 0.4;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+      border-radius: 2px;
+      overflow: hidden;
+      height: 60px !important;
+    }
+
+    .thumb-swiper .swiper-slide-thumb-active { opacity: 1; }
+
+    .thumb-swiper .swiper-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Top bar with counter + live badge */
+    .gallery-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 60px 24px;
+      animation: fadeUp 0.7s 0.5s ease both;
+    }
+
+    @media (max-width: 768px) {
+      .gallery-topbar { padding: 0 20px 20px; }
+      .thumb-swiper { padding: 16px 20px 0 !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header>
+  <a href="index.html" class="logo">
+    <div class="logo-mark"><span></span></div>
+    <span class="logo-text">Arte Gallery</span>
+  </a>
+  <nav>
+    <a href="upload.html" class="nav-link">Upload</a>
+    <a href="view.html"   class="nav-link active">Visualizar</a>
+  </nav>
+</header>
+
+<!-- ══ PAGE ══ -->
+<main class="page">
+
+  <div class="section-heading">
+    <span class="eyebrow">Coleção</span>
+    <h1>Galeria de Artes</h1>
+    <p>Explore as obras em exibição. Novos uploads aparecem automaticamente em tempo real.</p>
+    <div class="gold-line"></div>
+  </div>
+
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="loader-dot"></div>
+    <div class="loader-dot"></div>
+    <div class="loader-dot"></div>
+  </div>
+
+  <!-- Gallery (hidden until loaded) -->
+  <div class="gallery-container" id="galleryContainer" style="display:none">
+    <div class="ambient" id="ambient"></div>
+
+    <!-- Top bar: counter + live badge -->
+    <div class="gallery-topbar">
+      <div class="slide-counter" id="slideCounter">
+        Obra <span id="currentSlide">1</span> de <span id="totalSlides">—</span>
+      </div>
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        Atualização em tempo real
+      </div>
+    </div>
+
+    <!-- Main Swiper -->
+    <div class="swiper gallery-wrap" id="mainSwiper">
+      <div class="swiper-wrapper" id="swiperWrapper">
+        <!-- Slides são inseridos via JS -->
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-pagination"></div>
+    </div>
+
+    <!-- Thumbnail Swiper -->
+    <div class="swiper thumb-swiper" id="thumbSwiper">
+      <div class="swiper-wrapper" id="thumbWrapper">
+        <!-- Thumbnails são inseridos via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" id="emptyState" style="display:none">
+    <div class="empty-icon">
+      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M13.5 12h.008v.008H13.5V12zm0 0H12m1.5 0v.008H13.5V12zm-6 3.75h.008v.008H7.5v-.008zm0 0H6M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <h3>Nenhuma arte disponível</h3>
+    <p>A galeria ainda está vazia.<br>Seja o primeiro a enviar uma obra!</p>
+    <a href="upload.html" class="btn btn-primary" style="width:auto;margin:0 auto">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+      </svg>
+      Enviar a primeira arte
+    </a>
+  </div>
+
+</main>
+
+<footer>
+  &copy; <span id="year"></span> Arte Gallery — Sistema de Apresentação de Artes
+</footer>
+
+<!-- Toast de nova arte -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ SCRIPTS ══ -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  /* ================================================================
+     CONFIGURAÇÃO — Substitua pelos seus valores reais do Supabase:
+     1. Acesse https://supabase.com → Seu projeto → Settings → API
+     2. Copie a "Project URL" e a "anon public" key
+     ================================================================ */
+  const SUPABASE_URL = 'https://seu-projeto.supabase.co';   // ← substitua
+  const SUPABASE_KEY = 'sua-chave-anonima';                 // ← substitua
+
+  /* ----------------------------------------------------------------
+     SEGURANÇA — Row Level Security (RLS):
+     Para ativar no painel do Supabase, vá em:
+       Table Editor → artes → RLS → Enable RLS
+     Crie uma policy de SELECT pública:
+       • Target roles: anon
+       • USING expression: true
+     Isso permite que qualquer visitante visualize a galeria.
+     Para restringir uploads, configure a policy de INSERT apenas
+     para usuários autenticados (ver comentário em upload.html).
+     ---------------------------------------------------------------- */
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  /* ── DOM refs ── */
+  const loader           = document.getElementById('loader');
+  const galleryContainer = document.getElementById('galleryContainer');
+  const emptyState       = document.getElementById('emptyState');
+  const swiperWrapper    = document.getElementById('swiperWrapper');
+  const thumbWrapper     = document.getElementById('thumbWrapper');
+  const currentSlideEl   = document.getElementById('currentSlide');
+  const totalSlidesEl    = document.getElementById('totalSlides');
+  const toastEl          = document.getElementById('toast');
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ── State ── */
+  let artes    = [];
+  let swiper   = null;
+  let thumbSw  = null;
+
+  /* ════════════════════════════════════════
+     1. CARREGAMENTO INICIAL
+     ════════════════════════════════════════ */
+  async function carregarArtes() {
+    try {
+      const { data, error } = await supabase
+        .from('artes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      artes = data || [];
+      renderGallery();
+
+    } catch (err) {
+      console.error('Erro ao carregar artes:', err);
+      loader.style.display = 'none';
+      emptyState.style.display = 'block';
+      emptyState.querySelector('p').textContent =
+        'Erro ao carregar a galeria. Verifique as configurações do Supabase.';
+    }
+  }
+
+  /* ════════════════════════════════════════
+     2. RENDER DA GALERIA
+     ════════════════════════════════════════ */
+  function renderGallery() {
+    loader.style.display = 'none';
+
+    if (artes.length === 0) {
+      emptyState.style.display = 'block';
+      return;
+    }
+
+    galleryContainer.style.display = 'block';
+    totalSlidesEl.textContent = artes.length;
+
+    /* Limpa wrappers antes de popular */
+    swiperWrapper.innerHTML = '';
+    thumbWrapper.innerHTML  = '';
+
+    artes.forEach((arte, i) => {
+      /* Slide principal */
+      swiperWrapper.insertAdjacentHTML('beforeend', buildSlide(arte, i));
+      /* Thumbnail */
+      thumbWrapper.insertAdjacentHTML('beforeend', buildThumb(arte));
+    });
+
+    /* Destrói instâncias anteriores se existirem */
+    if (swiper)  { swiper.destroy(true, true);  swiper  = null; }
+    if (thumbSw) { thumbSw.destroy(true, true); thumbSw = null; }
+
+    initSwiper();
+  }
+
+  function buildSlide(arte, i) {
+    const nome = arte.nome || 'Sem título';
+    const data = formatDate(arte.created_at);
+    return `
+      <div class="swiper-slide">
+        <div class="art-slide" data-index="${i}">
+          <div class="art-frame">
+            <img class="art-img"
+              src="${escHtml(arte.url)}"
+              alt="${escHtml(nome)}"
+              loading="lazy"
+              onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%231a1a1a%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%236b6460%22 font-size=%2214%22%3EImagem indisponível%3C/text%3E%3C/svg%3E';"
+            />
+          </div>
+          <div class="art-caption">
+            <span class="art-name">${escHtml(nome)}</span>
+            <span class="art-date">${data}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function buildThumb(arte) {
+    return `
+      <div class="swiper-slide">
+        <img src="${escHtml(arte.url)}" alt="${escHtml(arte.nome || '')}" loading="lazy"
+          onerror="this.style.background='#1a1a1a';" />
+      </div>`;
+  }
+
+  /* ════════════════════════════════════════
+     3. INICIALIZAÇÃO DO SWIPER
+     ════════════════════════════════════════ */
+  function initSwiper() {
+    /* Thumbnail swiper (controlador) */
+    thumbSw = new Swiper('#thumbSwiper', {
+      spaceBetween:  10,
+      slidesPerView: 'auto',
+      freeMode:      true,
+      watchSlidesProgress: true,
+      breakpoints: {
+        0:   { slidesPerView: 4 },
+        480: { slidesPerView: 6 },
+        768: { slidesPerView: 8 },
+      },
+    });
+
+    /* Main swiper */
+    swiper = new Swiper('#mainSwiper', {
+      loop:          artes.length > 1,
+      centeredSlides: true,
+      spaceBetween:  30,
+      grabCursor:    true,
+      keyboard:      { enabled: true },
+      thumbs:        { swiper: thumbSw },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      autoplay: artes.length > 1
+        ? { delay: 6000, disableOnInteraction: false, pauseOnMouseEnter: true }
+        : false,
+      effect: 'slide',
+      on: {
+        slideChange() { updateCounter(this.realIndex); },
+        init()        { updateCounter(this.realIndex); },
+      },
+    });
+  }
+
+  function updateCounter(realIndex) {
+    const idx = ((realIndex % artes.length) + artes.length) % artes.length;
+    currentSlideEl.textContent = idx + 1;
+    totalSlidesEl.textContent  = artes.length;
+  }
+
+  /* ════════════════════════════════════════
+     4. REAL-TIME — Supabase Subscription
+     ════════════════════════════════════════ */
+  function subscribeToArtes() {
+    supabase
+      .channel('artes-channel')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'artes' },
+        payload => {
+          console.log('Nova arte recebida em tempo real:', payload.new);
+          const novaArte = payload.new;
+
+          /* Adiciona no início do array (mais recente primeiro) */
+          artes.unshift(novaArte);
+
+          /* Re-renderiza a galeria com a nova arte */
+          renderGallery();
+
+          /* Toast de notificação */
+          const nome = novaArte.nome || 'Sem título';
+          showToast(`✦ Nova obra adicionada: "${nome}"`);
+        }
+      )
+      .subscribe(status => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✓ Subscription em tempo real ativa.');
+        }
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('Aviso: subscription em tempo real não disponível.', status);
+        }
+      });
+  }
+
+  /* ════════════════════════════════════════
+     5. HELPERS
+     ════════════════════════════════════════ */
+  function formatDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 4000);
+  }
+
+  /* ════════════════════════════════════════
+     6. INICIALIZA
+     ════════════════════════════════════════ */
+  carregarArtes().then(() => subscribeToArtes());
+</script>
+
+</body>
+</html>
