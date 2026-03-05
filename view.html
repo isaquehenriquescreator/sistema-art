@@ -32,9 +32,27 @@
     .swiper-slide { opacity: 0.35; transition: opacity 0.5s ease; }
     .swiper-slide-active { opacity: 1; }
 
-    /* Scale inactive slides slightly */
+    /* Scale inactive slides + float animation on active */
     .art-slide { transform: scale(0.88); transition: transform 0.5s ease; }
-    .swiper-slide-active .art-slide { transform: scale(1); }
+    .swiper-slide-active .art-slide {
+      transform: scale(1);
+      animation: floatSlide 4s ease-in-out infinite;
+    }
+
+    @keyframes floatSlide {
+      0%, 100% { transform: scale(1) translateY(0px);   }
+      50%       { transform: scale(1) translateY(-14px); }
+    }
+
+    /* Imagem em proporção original, sem corte */
+    .art-img {
+      max-height: 80vh !important;
+      width: auto !important;
+      max-width: 100% !important;
+      object-fit: unset !important;
+      display: block;
+      margin: 0 auto;
+    }
 
     /* Thumbnail strip */
     .thumb-swiper {
@@ -350,6 +368,7 @@
      ════════════════════════════════════════ */
   function subscribeToArtes() {
     db
+      .channel('artes-channel')
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'artes' },
